@@ -1,0 +1,23 @@
+<h1>Mis trámites</h1>
+
+<table class="tramites-tabla" *ngIf="solicitudes$ | async as solicitudes">
+  <thead>
+    <tr>
+      <th>Folio</th>
+      <th>Permiso</th>
+      <th>Estado</th>
+      <th>Fecha</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let s of solicitudes">
+      <td>{{ s.folio }}</td>
+      <td>{{ s.tipoPermisoNombre }}</td>
+      <td><app-status-badge [estado]="s.estado" (seleccionado)="seleccionarEstado($event)"></app-status-badge></td>
+      <td>{{ s.fechaActualizacion | date }}</td>
+      <td><a [routerLink]="['/ciudadano/solicitud', s.tipoPermisoId, s.id]">Ver</a></td>
+    </tr>
+  </tbody>
+</table>
+<p *ngIf="ultimoEstado" class="muted">Estado seleccionado: {{ ultimoEstado }}</p>

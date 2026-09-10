@@ -1,0 +1,22 @@
+<nav class="wizard-stepper">
+  <span [class.activo]="pasoActual === PasoSolicitud.DATOS_TRAMITE">1. Datos del trámite</span>
+  <span [class.activo]="pasoActual === PasoSolicitud.DOCUMENTACION">2. Documentación</span>
+  <span [class.activo]="pasoActual === PasoSolicitud.PAGO">3. Pago</span>
+  <span [class.activo]="pasoActual === PasoSolicitud.CONFIRMACION">4. Confirmación</span>
+</nav>
+
+<section [ngSwitch]="pasoActual">
+  <div *ngSwitchCase="PasoSolicitud.DATOS_TRAMITE">
+    <h2>Datos del trámite</h2><label>Nombre del local <input [(ngModel)]="nombreLocal" /></label><br /><label>Dirección <input [(ngModel)]="direccion" /></label>
+  </div>
+  <div *ngSwitchCase="PasoSolicitud.DOCUMENTACION">
+    <h2>Documentación</h2><p>Adjunta los requisitos solicitados. Archivo: {{ archivoNombre || 'sin adjuntar' }}</p><input #archivoInput type="file" hidden (change)="archivoSeleccionado($event)" /><button type="button" (click)="seleccionarArchivo()">Adjuntar documento</button>
+  </div>
+  <div *ngSwitchCase="PasoSolicitud.PAGO">
+    <h2>Pago de derechos</h2><p>El pago es simulado. Monto referencial: {{ 25000 | currency:'CLP' }}</p>
+  </div>
+  <div *ngSwitchCase="PasoSolicitud.CONFIRMACION">
+    <h2>Solicitud enviada</h2><div class="notice">Tu solicitud será revisada por la Municipalidad. Conserva tu folio en Mis trámites.</div>
+  </div>
+</section>
+<p class="form-error" *ngIf="mensaje">{{ mensaje }}</p><button *ngIf="pasoActual !== PasoSolicitud.CONFIRMACION" type="button" (click)="siguiente()">Continuar</button>

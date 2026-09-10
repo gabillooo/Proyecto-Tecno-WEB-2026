@@ -1,0 +1,11 @@
+<h1>Catálogo de permisos y licencias</h1>
+
+<div class="catalogo-grid" *ngIf="tiposPermiso$ | async as tipos">
+  <article class="catalogo-card" *ngFor="let tipo of tipos">
+    <h2>{{ tipo.nombre }}</h2>
+    <p>{{ tipo.descripcion }}</p>
+    <p>Plazo estimado: {{ tipo.plazoEstimadoDias }} días</p>
+    <p>Tarifa: {{ tipo.tarifa | currency:'CLP' }}</p>
+    <a [routerLink]="['/ciudadano/solicitud', tipo.id]">Iniciar solicitud</a>
+  </article>
+</div>
