@@ -1,1 +1,77 @@
+# PermisosApp — README complementario
+
+Este documento complementa los README entregados: agrega detalles que se entienden al seguir la implementación actual de `tecno/proyecto1`. Describe el comportamiento que tiene el código hoy, incluyendo las funciones que todavía son demostrativas o no están conectadas a una pantalla.
+
+## 1. Qué ocurre desde que se abre la aplicación
+
+El punto de entrada es `src/index.html`, que contiene `<app-root>`. `src/main.ts` inicia Angular con `AppModule`; el módulo raíz registra `AppComponent` y el enrutador. `AppComponent` dibuja el marco común —encabezado, navegación, contenido de la ruta y pie— y mantiene el encabezado oculto mientras no exista una sesión.
+
+Las rutas generales están en `src/app/app-routing.module.ts`: la ruta inicial lleva a `/auth/login`, `/auth` y `/admin` se cargan bajo demanda, y cualquier dirección desconocida vuelve al login. Antes de cargar administración se ejecutan `AuthGuard` y `RoleGuard`. Las tres páginas administrativas se enlazan en `admin-routing.module.ts`.
+
+El ciclo de datos de las páginas sigue este patrón:
+
+```text
+Componente de página
+  → llama un método de un servicio singleton
+  → el servicio lee o modifica su BehaviorSubject
+  → el Observable notifica el cambio
+  → la plantilla lo muestra mediante el pipe async
+```
+
+Esto explica por qué las solicitudes y las estadísticas se actualizan juntas mientras la aplicación permanece abierta: ambas observan los datos del mismo `SolicitudesService`.
+
+## 2. Datos iniciales y duración de los cambios
+
+| Área | Datos de ejemplo al iniciar | Qué guarda durante la sesión |
+|---|---|---|
+| Acceso | Usuario `Admin`, rol `ADMINISTRADOR` | Sesión serializada en `localStorage`, bajo la clave `permisos_sesion` |
+| Catálogo | Patente comercial, autorización de eventos y ocupación de vía pública | Lista en memoria dentro de `PermisosService` |
+| Solicitudes | Una solicitud `SOL-2026-000123`, en estado `EN_REVISION`, asociada a patente comercial | Lista en memoria dentro de `SolicitudesService` |
+
+Al recargar la página, la sesión puede recuperarse desde `localStorage`; los cambios hechos al catálogo o a las solicitudes se pierden y se vuelven a cargar los datos iniciales definidos en los servicios. No hay base de datos ni persistencia de trámites en el navegador.
+
+Las estadísticas son conteos calculados en el momento sobre todas las solicitudes que están en memoria: agrupan por estado y por nombre del tipo de permiso. No aplican filtros ni excluyen estados.
+
+## 3. Lo que la interfaz usa y lo que solo está preparado
+
+| Parte | Conectado a la pantalla | Disponible en el servicio, pero sin flujo de pantalla |
+|---|---|---|
+| Solicitudes | Listar todas, aprobar y rechazar | Crear una solicitud ciudadana, avanzar pasos, adjuntar documentos, simular un pago, observar o emitir desde la interfaz, filtrar y consultar “mis solicitudes” |
+| Catálogo | Mostrar los tipos, incluidos los inactivos | Crear, actualizar y cambiar el estado activo; los botones “Nuevo tipo de permiso” y “Editar” no tienen acciones enlazadas |
+| Estadísticas | Mostrar conteos como listas de texto | Gráficos |
+| Ciudadanía | No hay páginas ni rutas de ciudadano | Hay modelos y métodos de servicio para iniciar y completar parte de una solicitud |
+
+En la bandeja, “Rechazar” manda al servicio un mensaje fijo: `Faltan antecedentes obligatorios.` No abre un cuadro ni permite redactar la observación. Aunque `resolver()` acepta las acciones `OBSERVAR` y `EMITIR`, los botones de esta pantalla solo llaman a aprobar o rechazar.
+
+## 4. Simulaciones y límites que conviene explicar
+
+- **Archivos:** `adjuntarDocumento()` registra el nombre, el requisito y una URL ficticia (`#`). No sube ni conserva el contenido del archivo.
+- **Pago:** `pagarSimulado()` genera un comprobante de ejemplo y siempre usa `25000`, sin consultar la tarifa del tipo de permiso. No se conecta a una pasarela de pago.
+- **Descarga:** `descargarComprobante()` entrega un `Blob` con el texto “Comprobante simulado”, no un comprobante oficial.
+- **Filtros:** `misSolicitudes()` y `listarTodas()` reciben un `FiltroSolicitudes`, pero actualmente lo ignoran y devuelven la lista completa.
+- **Resolución:** `resolver()` cambia el estado, pero no agrega el mensaje recibido a `observaciones` ni actualiza `fechaActualizacion`. Tampoco comprueba si la transición de estado es válida.
+- **Pasos del trámite:** `avanzarPaso()` mezcla los datos recibidos en `datosFormulario` y pasa a `EN_REVISION` cuando el paso es `CONFIRMACION`; no valida requisitos, documentos o pagos antes de hacerlo.
+- **Búsquedas individuales:** `PermisosService.obtener(id)` devuelve el primer elemento del catálogo cuando no encuentra el id solicitado. Por ello, un id incorrecto no produce una respuesta “no encontrado”.
+- **Rol ciudadano:** el guard contempla una redirección a `/ciudadano` para un usuario sin permisos administrativos, pero esa ruta no existe en esta entrega; las rutas desconocidas redirigen al login.
+
+Estos puntos son límites de la demostración actual, no garantías de un sistema municipal conectado.
+
+## 5. Detalles de archivos que pueden causar confusión
+
+- `src/app/app.component.ts` contiene la plantilla HTML del encabezado y el pie dentro del propio archivo. `app.component.html` y `app.component.css` existen, pero están vacíos.
+- `src/app/auth/pages/login/login.component.css` contiene estilos para el formulario, pero `LoginComponent` no declara `styleUrls`; Angular no los asocia al componente. Los estilos globales sí provienen de `src/styles.css`.
+- `angular.json` define la compilación, los estilos globales y la salida en `dist/permisos-app`. `package.json` define `npm start`, `npm run build` y `npm test`.
+- La configuración incluye Angular 15 y RxJS 7. No hay configuración de URL de API ni variables de entorno para un servidor.
+
+### Nota sobre las pruebas incluidas
+
+Hay un archivo `src/app/app.component.spec.ts`; por eso, no es preciso decir que el proyecto carece por completo de archivos de prueba. Ese archivo conserva aserciones del componente inicial generado por Angular CLI —por ejemplo, espera una propiedad `title` y el texto `proyecto1 app is running!`— que no aparecen en el `AppComponent` actual. Conviene actualizar esas aserciones antes de usar `npm test` como verificación de esta aplicación.
+
+## Archivos de referencia
+
+- Arranque y rutas: `src/main.ts`, `src/app/app.module.ts`, `src/app/app-routing.module.ts`, `src/app/features/admin/admin-routing.module.ts`.
+- Estado y reglas simuladas: `src/app/core/services/`.
+- Forma de usuarios, permisos y solicitudes: `src/app/core/models/`.
+- Plantillas de las páginas: `src/app/auth/pages/login/` y `src/app/features/admin/pages/`.
+- Configuración del proyecto: `package.json`, `angular.json`, `tsconfig.json`.
 
