@@ -1,2 +1,249 @@
+/* ==========================================================================
+   1. FUENTES Y VARIABLES GLOBALES
+   ========================================================================== */
+
 @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap');
-:root{--navy:#133a61;--cyan:#00bde3;--red:#bd3933;--pale:#e7f6f8;--ink:#1b1b1b}*{box-sizing:border-box}body{margin:0;color:var(--ink);font-family:'Source Sans 3',Arial,sans-serif}h1,h2{font-family:Merriweather,serif}h1{color:var(--navy)}h2{color:var(--red);border-bottom:3px solid var(--red);padding-bottom:.55rem}.site-header{background:var(--navy);color:#fff;padding:14px 5%;display:flex;align-items:center;gap:25px}.brand{font-family:Merriweather,serif;color:#fff;text-decoration:none}.brand small{display:block;font:600 .6rem 'Source Sans 3';letter-spacing:.14em}.site-header nav{display:flex;gap:16px;flex:1}.site-header a{color:#fff}.link-button{background:transparent;border:0;color:#fff;text-decoration:underline}.page-shell{max-width:1200px;margin:auto;padding:32px 24px;min-height:calc(100vh - 130px)}.site-footer{background:var(--navy);color:#fff;padding:25px 5%}.catalogo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}.catalogo-card,table{border:1px solid #78b8c8;background:#fff;padding:18px}.catalogo-card:nth-child(odd),.login-form,.notice{background:var(--pale)}button,.button{background:var(--navy);border:2px solid var(--navy);color:#fff;padding:10px 16px;font:700 1rem 'Source Sans 3';cursor:pointer;text-decoration:none;display:inline-block}button.secondary{background:#fff;color:var(--navy)}button:focus,input:focus,select:focus{outline:4px solid var(--cyan);outline-offset:1px}button:disabled{background:#ccc;border-color:#ccc}.login-form{max-width:440px;margin:8vh auto;border-top:5px solid var(--red);padding:26px;display:grid;gap:9px}.muted{color:#555}input,select,textarea{width:100%;padding:10px;border:2px solid #1b1b1b;font:inherit}.wizard-stepper{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}.wizard-stepper span{padding:8px 12px;background:#eee}.wizard-stepper .activo{background:var(--navy);color:#fff}.notice{border-left:6px solid var(--cyan);padding:15px;margin:16px 0}.admin-tabla,.tramites-tabla{border-collapse:collapse;width:100%;padding:0}.admin-tabla th,.admin-tabla td,.tramites-tabla th,.tramites-tabla td{padding:10px;border-bottom:1px solid #ccc;text-align:left}.admin-tabla th,.tramites-tabla th{background:var(--navy);color:#fff}@media(max-width:700px){.site-header{align-items:flex-start;flex-direction:column}.site-header nav{flex-wrap:wrap}.page-shell{padding:22px 14px}}
+
+:root {
+  --navy: #133a61;
+  --cyan: #00bde3;
+  --red: #bd3933;
+  --pale: #e7f6f8;
+  --ink: #1b1b1b;
+}
+
+*{
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: 'Source Sans 3', Arial, sans-serif;
+}
+
+
+/* ==========================================================================
+   2. TIPOGRAFÍA
+   ========================================================================== */
+
+h1,
+h2 {
+  font-family: Merriweather, serif;
+}
+
+h1 {
+  color: var(--navy);
+}
+
+h2 {
+  color: var(--red);
+  border-bottom: 3px solid var(--red);
+  padding-bottom: .55rem;
+}
+
+.muted {
+  color: #555;
+}
+
+
+/* ==========================================================================
+   3. LAYOUT GENERAL (header, footer, contenedor de página)
+   ========================================================================== */
+
+.site-header {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  padding: 14px 5%;
+  background: var(--navy);
+  color: #fff;
+}
+
+.brand {
+  color: #fff;
+  font-family: Merriweather, serif;
+  text-decoration: none;
+}
+
+.brand small {
+  display: block;
+  font: 600 .6rem 'Source Sans 3';
+  letter-spacing: .14em;
+}
+
+.site-header nav {
+  display: flex;
+  flex: 1;
+  gap: 16px;
+}
+
+.site-header a {
+  color: #fff;
+}
+
+.link-button {
+  background: transparent;
+  border: 0;
+  color: #fff;
+  text-decoration: underline;
+}
+
+.page-shell {
+  max-width: 1200px;
+  min-height: calc(100vh - 130px);
+  margin: auto;
+  padding: 32px 24px;
+}
+
+.site-footer {
+  padding: 25px 5%;
+  background: var(--navy);
+  color: #fff;
+}
+
+
+/* ==========================================================================
+   4. BOTONES Y CONTROLES DE FORMULARIO
+   ========================================================================== */
+
+button,
+.button {
+  display: inline-block;
+  padding: 10px 16px;
+  background: var(--navy);
+  border: 2px solid var(--navy);
+  color: #fff;
+  font: 700 1rem 'Source Sans 3';
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: #fff;
+  color: var(--navy);
+}
+
+button:disabled {
+  background: #ccc;
+  border-color: #ccc;
+}
+
+button:focus,
+input:focus,
+select:focus {
+  outline: 4px solid var(--cyan);
+  outline-offset: 1px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #1b1b1b;
+  font: inherit;
+}
+
+
+/* ==========================================================================
+   5. CATÁLOGO (grid de tarjetas)
+   ========================================================================== */
+
+.catalogo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.catalogo-card,
+table {
+  padding: 18px;
+  background: #fff;
+  border: 1px solid #78b8c8;
+}
+
+.catalogo-card:nth-child(odd) {
+  background: var(--pale);
+}
+
+
+/* ==========================================================================
+   6. WIZARD / STEPPER
+   ========================================================================== */
+
+.wizard-stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0;
+}
+
+.wizard-stepper span {
+  padding: 8px 12px;
+  background: #eee;
+}
+
+.wizard-stepper .activo {
+  background: var(--navy);
+  color: #fff;
+}
+
+
+/* ==========================================================================
+   7. AVISOS / NOTICE
+   ========================================================================== */
+
+.notice {
+  margin: 16px 0;
+  padding: 15px;
+  background: var(--pale);
+  border-left: 6px solid var(--cyan);
+}
+
+
+/* ==========================================================================
+   8. TABLAS (admin y trámites)
+   ========================================================================== */
+
+.admin-tabla,
+.tramites-tabla {
+  width: 100%;
+  padding: 0;
+  border-collapse: collapse;
+}
+
+.admin-tabla th,
+.admin-tabla td,
+.tramites-tabla th,
+.tramites-tabla td {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  text-align: left;
+}
+
+.admin-tabla th,
+.tramites-tabla th {
+  background: var(--navy);
+  color: #fff;
+}
+
+
+/* ==========================================================================
+   9. RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 700px) {
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .site-header nav {
+    flex-wrap: wrap;
+  }
+
+  .page-shell {
+    padding: 22px 14px;
+  }
+}
