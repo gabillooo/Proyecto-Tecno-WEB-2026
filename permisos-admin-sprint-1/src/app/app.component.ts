@@ -4,30 +4,8 @@ import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
-  template: `
-    <header class="site-header" *ngIf="auth.usuario$ | async as usuario">
-      <a class="brand" routerLink="/admin">
-        Municipalidad de New York
-        <small>ADMINISTRACIÓN DE PERMISOS</small>
-      </a>
-      <nav>
-        <a routerLink="/admin/solicitudes">Solicitudes</a>
-        <a routerLink="/admin/catalogo">Catálogo</a>
-        <a routerLink="/admin/estadisticas">Estadísticas</a>
-      </nav>
-      <button class="link-button" (click)="salir()">
-        Salir · {{ usuario.nombre }}
-      </button>
-    </header>
-
-    <main class="page-shell">
-      <router-outlet></router-outlet>
-    </main>
-
-    <footer class="site-footer">
-      Sprint 1 · Panel administrativo
-    </footer>
-  `
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
   constructor(

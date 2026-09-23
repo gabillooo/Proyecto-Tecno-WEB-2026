@@ -11,6 +11,7 @@ import { SolicitudesService } from '../../../../core/services/solicitudes.servic
 @Component({
   selector: 'app-solicitudes',
   templateUrl: './solicitudes.component.html',
+  styleUrls: ['./solicitudes.component.css'],
 })
 export class SolicitudesComponent implements OnInit {
   solicitudes$!: Observable<Solicitud[]>;

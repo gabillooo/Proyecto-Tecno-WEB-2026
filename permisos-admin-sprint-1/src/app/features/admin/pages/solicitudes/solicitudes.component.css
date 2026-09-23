@@ -1,0 +1,18 @@
+@import '../../admin-shared.css';
+
+/* Columna "Estado": un poco más de énfasis visual */
+.admin-tabla td:nth-child(4) {
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+/* Separación entre los botones Aprobar / Rechazar */
+.admin-tabla td:last-child {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.admin-tabla td:last-child button {
+  white-space: nowrap;
+}

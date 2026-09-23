@@ -1,0 +1,19 @@
+ */
+
+.admin-tabla {
+  width: 100%;
+  padding: 0;
+  border-collapse: collapse;
+}
+
+.admin-tabla th,
+.admin-tabla td {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  text-align: left;
+}
+
+.admin-tabla th {
+  background: var(--navy);
+  color: #fff;
+}

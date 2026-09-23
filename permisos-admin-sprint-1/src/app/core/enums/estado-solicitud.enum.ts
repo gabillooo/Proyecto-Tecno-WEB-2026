@@ -1,13 +1,13 @@
 /**
  * Estados posibles del ciclo de vida de una solicitud de permiso/licencia/patente.
  * El flujo típico es:
- * BORRADOR -> EN_REVISION -> (OBSERVADA -> EN_REVISION)* -> APROBADA -> EMITIDA
+ * BORRADOR -> EN_REVISION -> (OBSERVACION -> EN_REVISION)* -> APROBADA -> EMITIDA
  *                          -> RECHAZADA
  */
 export enum EstadoSolicitud {
   BORRADOR = 'BORRADOR',           // El ciudadano aún está completando el formulario (no enviado)
-  EN_REVISION = 'EN_REVISION',     // Enviada, pendiente de revisión por un administrador
-  OBSERVADA = 'OBSERVADA',         // El administrador solicitó correcciones al ciudadano
+  EN_REVISION = 'EN REVISION',     // Enviada, pendiente de revisión por un administrador
+  OBSERVACION = 'OBSERVACION',     // El administrador solicitó correcciones al ciudadano
   APROBADA = 'APROBADA',           // Aprobada, pendiente de emisión formal del documento
   RECHAZADA = 'RECHAZADA',         // Rechazada definitivamente
   EMITIDA = 'EMITIDA',             // Permiso emitido, trámite finalizado
@@ -16,7 +16,7 @@ export enum EstadoSolicitud {
 export const ESTADO_SOLICITUD_LABEL: Record<EstadoSolicitud, string> = {
   [EstadoSolicitud.BORRADOR]: 'Borrador',
   [EstadoSolicitud.EN_REVISION]: 'En revisión',
-  [EstadoSolicitud.OBSERVADA]: 'Observada',
+  [EstadoSolicitud.OBSERVACION]: 'Observación',
   [EstadoSolicitud.APROBADA]: 'Aprobada',
   [EstadoSolicitud.RECHAZADA]: 'Rechazada',
   [EstadoSolicitud.EMITIDA]: 'Emitida',

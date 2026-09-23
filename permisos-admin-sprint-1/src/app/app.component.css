@@ -1,0 +1,16 @@
+/* ==========================================================================
+   app.component.css
+   Layout raíz: header + contenido + footer, con footer siempre pegado
+   al fondo de la ventana aunque el contenido de la página sea corto
+   (ej. el login).
+   ========================================================================== */
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.page-shell {
+  flex: 1;
+}

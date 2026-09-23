@@ -17,13 +17,119 @@ export class SolicitudesService {
       folio: 'SOL-2026-000123',
       tipoPermisoId: 'patente',
       tipoPermisoNombre: 'Patente comercial',
-      solicitanteId: 'u-001',
+      solicitanteId: 'María Fernanda Rojas',
       estado: EstadoSolicitud.EN_REVISION,
       datosFormulario: { direccion: 'Av. Siempre Viva 123' },
       documentos: [],
       observaciones: [],
       fechaCreacion: '2026-09-01',
       fechaActualizacion: '2026-09-05'
+    },
+    {
+      id: 'sol-2',
+      folio: 'SOL-2026-000124',
+      tipoPermisoId: 'evento',
+      tipoPermisoNombre: 'Autorización de eventos',
+      solicitanteId: 'Carlos Andrés Muñoz',
+      estado: EstadoSolicitud.APROBADA,
+      datosFormulario: {
+        direccion: 'Plaza Central s/n',
+        nombreEvento: 'Feria de emprendedores',
+        fechaEvento: '2026-10-12'
+      },
+      documentos: [],
+      observaciones: [],
+      fechaCreacion: '2026-08-20',
+      fechaActualizacion: '2026-08-28'
+    },
+    {
+      id: 'sol-3',
+      folio: 'SOL-2026-000125',
+      tipoPermisoId: 'via',
+      tipoPermisoNombre: 'Ocupación de vía pública',
+      solicitanteId: 'Javiera Ignacia Soto',
+      estado: EstadoSolicitud.RECHAZADA,
+      datosFormulario: {
+        direccion: 'Calle Los Robles 456',
+        motivo: 'Instalación de andamios'
+      },
+      documentos: [],
+      observaciones: [
+        {
+          id: 'obs-1',
+          fecha: '2026-08-19',
+          autor: 'Admin',
+          mensaje:
+            'No cumple con las medidas de seguridad exigidas para vías con alto tránsito.',
+          resuelta: false
+        }
+      ],
+      fechaCreacion: '2026-08-15',
+      fechaActualizacion: '2026-08-19'
+    },
+    {
+      id: 'sol-4',
+      folio: 'SOL-2026-000126',
+      tipoPermisoId: 'patente',
+      tipoPermisoNombre: 'Patente comercial',
+      solicitanteId: 'Rodrigo Esteban Vargas',
+      estado: EstadoSolicitud.EMITIDA,
+      datosFormulario: { direccion: 'Av. Providencia 2200' },
+      documentos: [],
+      observaciones: [],
+      fechaCreacion: '2026-07-10',
+      fechaActualizacion: '2026-07-22'
+    },
+    {
+      id: 'sol-5',
+      folio: 'SOL-2026-000127',
+      tipoPermisoId: 'evento',
+      tipoPermisoNombre: 'Autorización de eventos',
+      solicitanteId: 'Antonia Belén Herrera',
+      estado: EstadoSolicitud.OBSERVACION,
+      datosFormulario: {
+        direccion: 'Parque Municipal',
+        nombreEvento: 'Concierto benéfico'
+      },
+      documentos: [],
+      observaciones: [
+        {
+          id: 'obs-2',
+          fecha: '2026-09-14',
+          autor: 'Admin',
+          mensaje:
+            'Falta certificado de seguridad del recinto. Debe adjuntarlo para continuar.',
+          resuelta: false
+        }
+      ],
+      fechaCreacion: '2026-09-10',
+      fechaActualizacion: '2026-09-14'
+    },
+    {
+      id: 'sol-6',
+      folio: 'SOL-2026-000128',
+      tipoPermisoId: 'via',
+      tipoPermisoNombre: 'Ocupación de vía pública',
+      solicitanteId: 'Diego Alonso Fuentes',
+      estado: EstadoSolicitud.BORRADOR,
+      datosFormulario: {},
+      documentos: [],
+      observaciones: [],
+      fechaCreacion: '2026-09-18',
+      fechaActualizacion: '2026-09-18'
+    },
+    {
+      id: 'sol-7',
+      folio: 'SOL-2026-000129',
+      tipoPermisoId: 'patente',
+      tipoPermisoNombre: 'Patente comercial',
+      solicitanteId: 'Camila Paz Contreras',
+      estado: EstadoSolicitud.EN_REVISION,
+      datosFormulario: { direccion: 'Camino La Vinilla 88' },
+      documentos: [],
+      observaciones: [],
+      fechaCreacion: '2026-09-19',
+      fechaActualizacion: '2026-09-20'
     }
   ]);
 
@@ -120,7 +226,7 @@ export class SolicitudesService {
         ? EstadoSolicitud.RECHAZADA
         : d.accion === 'EMITIR'
         ? EstadoSolicitud.EMITIDA
-        : EstadoSolicitud.OBSERVADA;
+        : EstadoSolicitud.OBSERVACION;
 
     return this.cambiar(d.solicitudId, (s) => ({ ...s, estado: e }));
   }

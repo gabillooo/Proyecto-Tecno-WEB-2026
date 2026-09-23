@@ -203,18 +203,15 @@ table {
 
 
 /* ==========================================================================
-   8. TABLAS (admin y trámites)
+   8. TABLAS (solo trámites del ciudadano
    ========================================================================== */
 
-.admin-tabla,
 .tramites-tabla {
   width: 100%;
   padding: 0;
   border-collapse: collapse;
 }
 
-.admin-tabla th,
-.admin-tabla td,
 .tramites-tabla th,
 .tramites-tabla td {
   padding: 10px;
@@ -222,7 +219,6 @@ table {
   text-align: left;
 }
 
-.admin-tabla th,
 .tramites-tabla th {
   background: var(--navy);
   color: #fff;

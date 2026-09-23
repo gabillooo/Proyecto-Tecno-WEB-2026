@@ -1,0 +1,18 @@
+@import '../../admin-shared.css';
+
+/* Separación entre el título y el botón de acción principal */
+h1 + button {
+  display: inline-block;
+  margin: 8px 0 24px;
+}
+
+/* Columna "Activo": resalta el valor para escanear la tabla más rápido */
+.admin-tabla td:nth-child(5) {
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Botón "Editar" alineado a la derecha de su celda */
+.admin-tabla td:last-child {
+  text-align: right;
+}

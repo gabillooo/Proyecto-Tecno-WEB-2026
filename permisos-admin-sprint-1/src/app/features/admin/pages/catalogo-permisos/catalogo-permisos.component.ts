@@ -10,6 +10,7 @@ import { TipoPermiso } from '../../../../core/models/permiso.model';
 @Component({
   selector: 'app-catalogo-permisos',
   templateUrl: './catalogo-permisos.component.html',
+  styleUrls: ['./catalogo-permisos.component.css'],
 })
 export class CatalogoPermisosComponent implements OnInit {
   tiposPermiso$!: Observable<TipoPermiso[]>;
