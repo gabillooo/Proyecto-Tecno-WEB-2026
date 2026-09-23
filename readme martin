@@ -1,1 +1,167 @@
+# PermisosApp — Mapa de conexiones (Sprint 1 Administrativo)
+
+Este documento explica **dónde vive cada pieza de la app y cómo se conectan entre sí**: módulos, rutas, componentes, servicios, guards, modelos y enums.
+
+Ruta del proyecto: `permisos-admin-sprint-1/src/app/`
+
+---
+
+## 1. Vista general del árbol
+
+```
+src/app/
+├── app.module.ts                 → módulo raíz
+├── app-routing.module.ts         → rutas raíz (lazy loading)
+├── app.component.ts / .html      → shell visual (header, nav, router-outlet)
+│
+├── auth/                         → módulo de autenticación (lazy)
+│   ├── auth.module.ts
+│   └── pages/login/
+│       ├── login.component.ts
+│       └── login.component.html
+│
+├── features/admin/               → módulo de administración (lazy, protegido)
+│   ├── admin.module.ts
+│   ├── admin-routing.module.ts
+│   └── pages/
+│       ├── solicitudes/          → bandeja de solicitudes
+│       ├── catalogo-permisos/    → catálogo de tipos de permiso
+│       └── estadisticas/         → resumen de métricas
+│
+└── core/                         → capa transversal (sin UI)
+    ├── services/                 → AuthService, PermisosService, SolicitudesService
+    ├── guards/                   → AuthGuard, RoleGuard
+    ├── models/                   → interfaces / DTOs
+    └── enums/                    → EstadoSolicitud, RolUsuario, TipoPermisoCategoria
+```
+
+---
+
+## 2. Módulos y cómo se enganchan
+
+| Módulo | Archivo | Se carga desde | Declara |
+|---|---|---|---|
+| `AppModule` | `app.module.ts` | Bootstrap (`main.ts`) | `AppComponent` |
+| `AppRoutingModule` | `app-routing.module.ts` | Importado por `AppModule` | rutas raíz `auth/` y `admin/` (lazy) |
+| `AuthModule` | `auth/auth.module.ts` | Lazy-load desde `app-routing.module.ts` (`path: 'auth'`) | `LoginComponent` |
+| `AdminModule` | `features/admin/admin.module.ts` | Lazy-load desde `app-routing.module.ts` (`path: 'admin'`) | `SolicitudesComponent`, `CatalogoPermisosComponent`, `EstadisticasComponent` |
+| `AdminRoutingModule` | `features/admin/admin-routing.module.ts` | Importado por `AdminModule` | subrutas de `/admin` |
+
+`core/` **no es un módulo**: sus servicios usan `providedIn: 'root'`, así que Angular los inyecta como singletons donde se pidan, sin necesidad de importarlos en ningún `NgModule`.
+
+---
+
+## 3. Mapa de rutas (quién apunta a quién)
+
+```
+''                     → redirect a 'auth/login'
+'auth'                 → AuthModule (lazy)
+   'auth/login'        → LoginComponent
+'admin'                → AdminModule (lazy)  ⛔ protegida por AuthGuard + RoleGuard (solo ADMINISTRADOR)
+   'admin' (vacío)     → redirect a 'solicitudes'
+   'admin/solicitudes' → SolicitudesComponent
+   'admin/catalogo'    → CatalogoPermisosComponent
+   'admin/estadisticas'→ EstadisticasComponent
+'**'                   → redirect a 'auth/login'
+```
+
+- Definidas en `app-routing.module.ts` (raíz) y `features/admin/admin-routing.module.ts` (hijas).
+- La ruta `admin` es la única con `canActivate: [AuthGuard, RoleGuard]` y `data: { rolesPermitidos: [RolUsuario.ADMINISTRADOR] }`.
+
+---
+
+## 4. Guards — dónde actúan y a qué servicio llaman
+
+| Guard | Archivo | Se aplica en | Depende de |
+|---|---|---|---|
+| `AuthGuard` | `core/guards/auth.guard.ts` | ruta `'admin'` (`app-routing.module.ts`) | `AuthService.usuarioActual` — si no hay usuario logueado, redirige a `/auth/login` |
+| `RoleGuard` | `core/guards/role.guard.ts` | ruta `'admin'` (`app-routing.module.ts`) | `AuthService.usuarioActual` + `route.data['rolesPermitidos']` — si el rol no calza, redirige a `/admin` o `/ciudadano` |
+
+Ambos guards se inyectan directamente en el arreglo `canActivate` de la ruta `'admin'`, y ambos dependen de `AuthService` (no de HTTP, ya que la sesión es simulada con `localStorage`).
+
+---
+
+## 5. Servicios — quién los consume
+
+Todos viven en `core/services/` y son singletons (`providedIn: 'root'`).
+
+### `AuthService` (`core/services/auth.service.ts`)
+- Guarda la sesión en `localStorage` (clave `permisos_sesion`) y expone `usuario$` (Observable) y `usuarioActual` (getter síncrono).
+- **Consumido por:**
+  - `LoginComponent` → llama a `login()`
+  - `AppComponent` → se suscribe a `usuario$` para mostrar el header/nav, y llama a `logout()`
+  - `AuthGuard` y `RoleGuard` → leen `usuarioActual`
+
+### `PermisosService` (`core/services/permisos.service.ts`)
+- Mantiene en memoria el catálogo de `TipoPermiso` (patente, evento, vía pública).
+- **Consumido por:**
+  - `CatalogoPermisosComponent` → llama a `listar()` (CRUD de tipos de permiso pendiente: crear/actualizar ya están implementados en el servicio, falta conectarlos a un formulario)
+
+### `SolicitudesService` (`core/services/solicitudes.service.ts`)
+- Mantiene en memoria las `Solicitud` (instancias concretas pedidas por ciudadanos) y su ciclo de estados.
+- **Consumido por:**
+  - `SolicitudesComponent` → `listarTodas()`, `resolver()` (aprobar/rechazar)
+  - `EstadisticasComponent` → `estadisticas()` (agrupa por estado y por tipo)
+
+Ningún servicio llama a un backend real: todos usan `BehaviorSubject` + `of()`/`delay()` para simular HTTP.
+
+---
+
+## 6. Modelos y enums — quién los importa
+
+| Archivo | Contenido | Usado por |
+|---|---|---|
+| `core/models/usuario.model.ts` | `Usuario`, `LoginDto`, `SesionDto` | `AuthService`, `LoginComponent` |
+| `core/models/solicitud.model.ts` | `Solicitud`, `DocumentoAdjunto`, `ObservacionTramite`, `ComprobantePago`, `PasoSolicitud`, `AvanzarPasoDto`, `ResolverSolicitudDto`, `FiltroSolicitudes` | `SolicitudesService`, `SolicitudesComponent` |
+| `core/models/permiso.model.ts` | `TipoPermiso`, `RequisitoPermiso`, `TipoPermisoFormDto` | `PermisosService`, `CatalogoPermisosComponent` |
+| `core/enums/estado-solicitud.enum.ts` | `EstadoSolicitud` (+ labels), `TipoPermisoCategoria`, `RolUsuario` | Prácticamente todo el proyecto: servicios, guards, rutas (`rolesPermitidos`) y componentes |
+
+---
+
+## 7. Flujo end-to-end (ejemplo real)
+
+**Login → Panel de solicitudes → Aprobar una solicitud**
+
+1. `LoginComponent` (en `AuthModule`) arma un `FormGroup` reactivo y al enviar llama a `AuthService.login()`.
+2. `AuthService` valida credenciales fijas (`admin@municipal.cl` / `1234`), guarda la sesión en `localStorage` y emite el nuevo usuario por `usuario$`.
+3. `LoginComponent` navega a `/admin` con el `Router`.
+4. El `Router` evalúa `AuthGuard` y `RoleGuard` en la ruta `'admin'`; ambos leen `AuthService.usuarioActual` y dejan pasar porque el rol es `ADMINISTRADOR`.
+5. Se carga `AdminModule` (lazy) → `AdminRoutingModule` redirige a `admin/solicitudes` → se instancia `SolicitudesComponent`.
+6. `SolicitudesComponent` pide `SolicitudesService.listarTodas()` y pinta la tabla con el pipe `async`.
+7. Al hacer clic en "Aprobar", se llama a `SolicitudesService.resolver({ accion: 'APROBAR' })`, que actualiza el `BehaviorSubject` interno y refresca la tabla automáticamente (misma suscripción).
+8. Mientras tanto, `AppComponent` (siempre visible, fuera del `router-outlet`) sigue suscrito a `AuthService.usuario$` para mostrar el nombre del usuario en el header y el botón "Salir" (que llama a `logout()` y navega a `/auth/login`).
+
+---
+
+## 8. Resumen visual (texto)
+
+```
+main.ts
+  └─ AppModule
+       └─ AppComponent (header + <router-outlet>)
+            ├─ usa AuthService (usuario$, logout)
+            └─ AppRoutingModule
+                 ├─ /auth  → AuthModule
+                 │            └─ LoginComponent → usa AuthService.login()
+                 │
+                 └─ /admin → [AuthGuard, RoleGuard] → usa AuthService.usuarioActual
+                              └─ AdminModule
+                                   └─ AdminRoutingModule
+                                        ├─ /solicitudes → SolicitudesComponent → usa SolicitudesService
+                                        ├─ /catalogo    → CatalogoPermisosComponent → usa PermisosService
+                                        └─ /estadisticas→ EstadisticasComponent → usa SolicitudesService.estadisticas()
+
+core/services  (AuthService, PermisosService, SolicitudesService) → singletons, providedIn:'root'
+core/guards    (AuthGuard, RoleGuard) → usan AuthService
+core/models    (interfaces/DTOs) → usados por servicios y componentes
+core/enums     (EstadoSolicitud, RolUsuario, TipoPermisoCategoria) → usados en todo el proyecto
+```
+
+---
+
+## 9. Notas / pendientes detectados en el código
+
+- `CatalogoPermisosComponent` aún no tiene el formulario de alta/edición conectado (hay un `TODO` en el archivo); el servicio (`crear`, `actualizar`) ya está listo para usarse.
+- `SolicitudesComponent` no tiene filtros ni modal de resolución con mensaje obligatorio (también marcado como `TODO`).
+- No hay backend real: todo el "HTTP" es simulado con `BehaviorSubject`/`of()`/`delay()` en los servicios de `core/services`.
 
