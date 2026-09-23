@@ -1,1 +1,84 @@
+# Permisos Municipales
 
+Aplicación web de demostración para administrar solicitudes de permisos municipales. Incluye acceso de administrador, revisión de solicitudes, catálogo de permisos y un resumen estadístico.
+
+> **Estado del proyecto:** prototipo frontend. Los datos y las operaciones se mantienen en memoria; no hay conexión a una API ni persistencia de solicitudes.
+
+## Funcionalidades
+
+- Inicio de sesión de administrador con sesión guardada en `localStorage`.
+- Protección de las rutas administrativas mediante guardas de autenticación y rol.
+- Revisión de solicitudes y acciones para aprobar o rechazar.
+- Catálogo inicial de permisos: patente comercial, autorización de eventos y ocupación de vía pública.
+- Vista de estadísticas agrupadas por estado y tipo de permiso.
+- Servicios Angular separados para autenticación, solicitudes y tipos de permiso.
+
+## Tecnologías
+
+- Angular 15
+- TypeScript 4.9
+- RxJS 7
+- Angular Router y Reactive Forms
+
+## Requisitos
+
+- Node.js compatible con Angular 15.
+- npm.
+
+## Instalación y ejecución
+
+Desde la carpeta `proyecto`:
+
+```bash
+npm install
+npm start
+```
+
+Abre [http://localhost:4200](http://localhost:4200) en el navegador. La ruta inicial redirige al formulario de acceso.
+
+### Acceso de demostración
+
+| Campo | Valor |
+| --- | --- |
+| Correo | `admin@municipal.cl` |
+| Contraseña | `1234` |
+
+Estas credenciales están definidas en el servicio frontend y son solo para desarrollo. No deben utilizarse como mecanismo de autenticación en producción.
+
+## Comandos disponibles
+
+| Comando | Descripción |
+| --- | --- |
+| `npm start` | Inicia el servidor de desarrollo Angular. |
+| `npm run build` | Genera la compilación de producción en `dist/permisos-app`. |
+| `npm run watch` | Compila en modo desarrollo y observa cambios. |
+| `npm test` | Ejecuta las pruebas configuradas con Karma y Jasmine. |
+
+## Secciones de la aplicación
+
+| Ruta | Descripción |
+| --- | --- |
+| `/auth/login` | Inicio de sesión. |
+| `/admin/solicitudes` | Listado y revisión de solicitudes. |
+| `/admin/catalogo` | Vista del catálogo de tipos de permiso. |
+| `/admin/estadisticas` | Resumen de solicitudes por estado y tipo. |
+
+Las rutas `/admin` requieren una sesión con rol de administrador. La ruta `/admin` redirige al listado de solicitudes.
+
+## Estructura principal
+
+```text
+src/app/
+├── auth/                 # Módulo y pantalla de acceso
+├── core/
+│   ├── enums/            # Roles y estados
+│   ├── guards/           # Protección de rutas
+│   ├── models/           # Modelos de dominio
+│   └── services/         # Autenticación, solicitudes y permisos
+└── features/admin/
+    └── pages/            # Solicitudes, catálogo y estadísticas
+```
+
+## Alcance actual
+
+Los servicios usan datos de ejemplo en memoria y los cambios se pierden al recargar la página. El flujo de pagos y la descarga de comprobantes son simulados. La interfaz actual expone las pantallas administrativas; no incluye todavía un portal ciudadano completo para crear y seguir solicitudes. Para un despliegue real se necesita integrar un backend, persistencia, autenticación segura y validaciones del lado servidor.
