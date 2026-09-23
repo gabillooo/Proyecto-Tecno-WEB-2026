@@ -1,84 +1,32 @@
-# Permisos Municipales
+## Inicio de sesión (`/auth/login`)
 
-Aplicación web de demostración para administrar solicitudes de permisos municipales. Incluye acceso de administrador, revisión de solicitudes, catálogo de permisos y un resumen estadístico.
-
-> **Estado del proyecto:** prototipo frontend. Los datos y las operaciones se mantienen en memoria; no hay conexión a una API ni persistencia de solicitudes.
-
-## Funcionalidades
-
-- Inicio de sesión de administrador con sesión guardada en `localStorage`.
-- Protección de las rutas administrativas mediante guardas de autenticación y rol.
-- Revisión de solicitudes y acciones para aprobar o rechazar.
-- Catálogo inicial de permisos: patente comercial, autorización de eventos y ocupación de vía pública.
-- Vista de estadísticas agrupadas por estado y tipo de permiso.
-- Servicios Angular separados para autenticación, solicitudes y tipos de permiso.
-
-## Tecnologías
-
-- Angular 15
-- TypeScript 4.9
-- RxJS 7
-- Angular Router y Reactive Forms
-
-## Requisitos
-
-- Node.js compatible con Angular 15.
-- npm.
-
-## Instalación y ejecución
-
-Desde la carpeta `proyecto`:
-
-```bash
-npm install
-npm start
-```
-
-Abre [http://localhost:4200](http://localhost:4200) en el navegador. La ruta inicial redirige al formulario de acceso.
-
-### Acceso de demostración
-
-| Campo | Valor |
+| Botón | Destino o acción |
 | --- | --- |
-| Correo | `admin@municipal.cl` |
-| Contraseña | `1234` |
+| **Ingresar** | Si las credenciales son válidas, inicia sesión y lleva al panel de administración, cuya ruta inicial es `/admin/solicitudes`. Si son incorrectas, permanece en el formulario y muestra un mensaje de error. Mientras se procesa el acceso, el botón se deshabilita y muestra **Ingresando...**. |
+| **Enfocar contraseña** | No navega a otra pantalla. Lleva el cursor al campo **Contraseña** para que se pueda escribir. |
 
-Estas credenciales están definidas en el servicio frontend y son solo para desarrollo. No deben utilizarse como mecanismo de autenticación en producción.
+## Solicitudes (`/admin/solicitudes`)
 
-## Comandos disponibles
-
-| Comando | Descripción |
+| Botón | Destino o acción |
 | --- | --- |
-| `npm start` | Inicia el servidor de desarrollo Angular. |
-| `npm run build` | Genera la compilación de producción en `dist/permisos-app`. |
-| `npm run watch` | Compila en modo desarrollo y observa cambios. |
-| `npm test` | Ejecuta las pruebas configuradas con Karma y Jasmine. |
+| **Aprobar** | No cambia de pantalla. Actualiza el estado de la solicitud seleccionada a **Aprobada**. |
+| **Rechazar** | No cambia de pantalla. Actualiza el estado de la solicitud seleccionada a **Rechazada**. |
 
-## Secciones de la aplicación
+## Catálogo de permisos (`/admin/catalogo`)
 
-| Ruta | Descripción |
+| Botón | Destino o acción |
 | --- | --- |
-| `/auth/login` | Inicio de sesión. |
-| `/admin/solicitudes` | Listado y revisión de solicitudes. |
-| `/admin/catalogo` | Vista del catálogo de tipos de permiso. |
-| `/admin/estadisticas` | Resumen de solicitudes por estado y tipo. |
+| **Nuevo tipo de permiso** | Actualmente no navega ni ejecuta una acción: el botón todavía no tiene una función conectada. |
+| **Editar** | Actualmente no navega ni edita el permiso: el botón todavía no tiene una función conectada. |
 
-Las rutas `/admin` requieren una sesión con rol de administrador. La ruta `/admin` redirige al listado de solicitudes.
+## Estadísticas (`/admin/estadisticas`)
 
-## Estructura principal
+Esta pantalla no tiene botones implementados actualmente.
 
-```text
-src/app/
-├── auth/                 # Módulo y pantalla de acceso
-├── core/
-│   ├── enums/            # Roles y estados
-│   ├── guards/           # Protección de rutas
-│   ├── models/           # Modelos de dominio
-│   └── services/         # Autenticación, solicitudes y permisos
-└── features/admin/
-    └── pages/            # Solicitudes, catálogo y estadísticas
-```
+## Navegación entre pantallas
 
-## Alcance actual
+La interfaz no muestra botones o enlaces de navegación entre las secciones administrativas. Se puede abrir cada vista directamente usando estas rutas:
 
-Los servicios usan datos de ejemplo en memoria y los cambios se pierden al recargar la página. El flujo de pagos y la descarga de comprobantes son simulados. La interfaz actual expone las pantallas administrativas; no incluye todavía un portal ciudadano completo para crear y seguir solicitudes. Para un despliegue real se necesita integrar un backend, persistencia, autenticación segura y validaciones del lado servidor.
+- `/admin/solicitudes`
+- `/admin/catalogo`
+- `/admin/estadisticas`
