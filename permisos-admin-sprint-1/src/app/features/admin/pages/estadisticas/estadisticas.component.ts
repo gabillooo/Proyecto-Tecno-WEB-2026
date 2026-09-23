@@ -9,6 +9,7 @@ import { SolicitudesService } from '../../../../core/services/solicitudes.servic
 @Component({
   selector: 'app-estadisticas',
   templateUrl: './estadisticas.component.html',
+  styleUrls: ['./estadisticas.component.css'],
 })
 export class EstadisticasComponent implements OnInit {
   estadisticas$!: Observable<{ porEstado: Record<string, number>; porTipo: Record<string, number> }>;
