@@ -1,1 +1,150 @@
+PermisosApp – Guía de conceptos Angular
 
+Este documento indica dónde se encuentra cada concepto de Angular en el proyecto (archivo y línea) y cómo funciona.
+
+Rutas relativas a src/app/.
+
+Resumen
+Concepto	¿Está en el proyecto?	Archivos principales
+Interpolación {{ }}	✅ Sí	app.component.html, login.component.html, páginas de features/admin/pages/*
+Property Binding [ ]	✅ Sí	login.component.html
+Event Binding ( )	✅ Sí	app.component.html, login.component.html, solicitudes.component.html
+*ngIf	✅ Sí	app.component.html, login.component.html, catalogo-permisos, estadisticas, solicitudes
+*ngFor	✅ Sí	catalogo-permisos, estadisticas, solicitudes
+AuthGuard	✅ Sí	core/guards/auth.guard.ts, app-routing.module.ts
+Parámetros de ruta :id (Catálogo)	❌ No implementado	Ver sección 6
+Bootstrap form-group / form-control	❌ No implementado	Ver sección 8
+1. Interpolación {{ }}
+
+Muestra en el HTML el valor de una expresión o variable del componente. Flujo: TS → HTML.
+
+Archivo	Línea	Código	Qué muestra
+app.component.html	12	{{ usuario.nombre }}	Nombre del usuario en el botón "Salir"
+auth/pages/login/login.component.html	11	{{ errorMensaje }}	Mensaje de error de login
+auth/pages/login/login.component.html	14	{{ cargando ? 'Ingresando...' : 'Ingresar' }}	Texto del botón (interpolación con operador ternario)
+features/admin/pages/catalogo-permisos/catalogo-permisos.component.html	17–21	{{ tipo.nombre }}, {{ tipo.categoria }}, {{ tipo.tarifa | currency:'CLP' }}, etc.	Columnas de la tabla del catálogo
+features/admin/pages/solicitudes/solicitudes.component.html	16–20	{{ s.folio }}, {{ s.estado }}, {{ s.fechaActualizacion | date }}, etc.	Columnas de la tabla de solicitudes
+features/admin/pages/estadisticas/estadisticas.component.html	7 y 13	{{ entry.key }}: {{ entry.value }}	Conteos por estado y por tipo
+2. Property Binding [ ]
+
+Enlaza una propiedad de un elemento o directiva con una variable del componente. Flujo: TS → HTML.
+
+Archivo	Línea	Código	Qué hace
+auth/pages/login/login.component.html	1	[formGroup]="form"	Enlaza el <form> con el FormGroup definido en login.component.ts
+auth/pages/login/login.component.html	13	[disabled]="cargando"	Deshabilita el botón "Ingresar" mientras se procesa el login
+
+Nota: los routerLink de app.component.html (líneas 2, 7, 8, 9) están escritos como atributo estático (routerLink="/admin"), no como property binding. La versión con binding sería [routerLink]="['/admin', id]".
+
+3. Event Binding ( )
+
+Ejecuta un método o expresión cuando ocurre un evento. Flujo: HTML → TS.
+
+Archivo	Línea	Código	Qué hace
+app.component.html	11	(click)="salir()"	Cierra sesión y redirige a /auth/login (método en app.component.ts, línea 16)
+auth/pages/login/login.component.html	1	(ngSubmit)="onSubmit()"	Envía el formulario de login (método en login.component.ts, línea 26)
+auth/pages/login/login.component.html	16	(click)="passwordInput.focus()"	Enfoca el campo contraseña usando una referencia local #passwordInput
+features/admin/pages/solicitudes/solicitudes.component.html	21	(click)="aprobar(s.id)" y (click)="rechazar(s.id)"	Aprueba o rechaza una solicitud (métodos en solicitudes.component.ts, líneas 24–25)
+4. *ngIf
+
+Directiva estructural: agrega o quita un elemento del DOM según una condición.
+
+Archivo	Línea	Código	Qué hace
+app.component.html	1	*ngIf="auth.usuario$ | async as usuario"	Muestra el header solo si hay un usuario logueado
+auth/pages/login/login.component.html	11	*ngIf="errorMensaje"	Muestra el error solo si existe
+features/admin/pages/catalogo-permisos/catalogo-permisos.component.html	4	*ngIf="tiposPermiso$ | async as tipos"	Muestra la tabla cuando llegan los datos
+features/admin/pages/solicitudes/solicitudes.component.html	3	*ngIf="solicitudes$ | async as solicitudes"	Igual, para la tabla de solicitudes
+features/admin/pages/estadisticas/estadisticas.component.html	3	*ngIf="estadisticas$ | async as stats"	Igual, para el panel de estadísticas
+
+El patrón *ngIf="observable$ | async as variable" se suscribe al Observable, guarda el valor en una variable y solo renderiza cuando hay dato.
+
+5. *ngFor
+
+Directiva estructural: repite un elemento por cada ítem de una lista.
+
+Archivo	Línea	Código	Qué repite
+features/admin/pages/catalogo-permisos/catalogo-permisos.component.html	16	*ngFor="let tipo of tipos"	Una fila por cada tipo de permiso
+features/admin/pages/solicitudes/solicitudes.component.html	15	*ngFor="let s of solicitudes"	Una fila por cada solicitud
+features/admin/pages/estadisticas/estadisticas.component.html	7 y 13	*ngFor="let entry of stats.porEstado | keyvalue" (y porTipo)	Un ítem de lista por cada clave/valor del objeto
+
+Los datos vienen de los servicios en core/services/ (permisos.service.ts y solicitudes.service.ts).
+
+6. Parámetros de ruta (:id) desde el Catálogo
+
+Estado: no implementado. En el proyecto actual no existe ninguna ruta con :id, ni se usa ActivatedRoute / paramMap.
+
+Lo que existe hoy:
+
+features/admin/admin-routing.module.ts, línea 10: { path: 'catalogo', component: CatalogoPermisosComponent } (sin parámetro).
+catalogo-permisos.component.html, línea 22: el botón "Editar" no tiene ninguna acción asociada.
+core/services/permisos.service.ts, línea 59: ya existe obtener(id), que devuelve un TipoPermiso por su id (listo para usarse).
+Cómo implementarlo
+Definir la ruta en features/admin/admin-routing.module.ts:
+ts
+   { path: 'catalogo/:id', component: DetalleTipoPermisoComponent }
+Enviar el id desde el Catálogo en catalogo-permisos.component.html (línea 22):
+html
+   <a [routerLink]="['/admin/catalogo', tipo.id]">Editar</a>
+Recibir el id en el componente destino:
+ts
+   constructor(private route: ActivatedRoute, private permisos: PermisosService) {}
+
+   ngOnInit() {
+     const id = this.route.snapshot.paramMap.get('id')!;
+     this.tipo$ = this.permisos.obtener(id);
+   }
+Declarar el componente nuevo en features/admin/admin.module.ts.
+7. AuthGuard
+
+Protege rutas: solo permite el acceso si hay un usuario autenticado; si no, redirige al login.
+
+Archivo	Descripción
+core/guards/auth.guard.ts	Define AuthGuard (CanActivate). Si auth.usuarioActual existe devuelve true; si no, redirige a /auth/login (líneas 9–14)
+app-routing.module.ts, línea 22	Se aplica a la ruta admin con canActivate: [AuthGuard, RoleGuard]
+core/services/auth.service.ts	Provee usuarioActual (línea 49) y guarda la sesión en localStorage
+
+Guards relacionados:
+
+core/guards/role.guard.ts: además de estar logueado, verifica que el rol esté en data.rolesPermitidos (definido en app-routing.module.ts, línea 23–25, solo ADMINISTRADOR).
+core/guards/home-redirect.guard.ts: usado en la ruta vacía '' (línea 12) y en '**' (línea 32); redirige a /admin si hay sesión o a /auth/login si no.
+
+Las rutas protegidas son /admin, /admin/solicitudes, /admin/catalogo y /admin/estadisticas, porque las hijas heredan el guard de admin.
+
+8. Bootstrap: form-group y form-control
+
+Estado: no implementado. Bootstrap no está instalado (no aparece en package.json ni en angular.json), y ninguna vista usa las clases form-group ni form-control.
+
+Lo que existe hoy:
+
+El formulario de login (auth/pages/login/login.component.html) usa <label> e <input> sin clases; su estilo viene de CSS propio (login.component.css y src/styles.css).
+Los estilos se cargan desde src/styles.css (declarado en angular.json, sección styles).
+Cómo agregarlo
+Instalar: npm install bootstrap
+En angular.json, sección styles (en build y test):
+json
+   "styles": ["node_modules/bootstrap/dist/css/bootstrap.min.css", "src/styles.css"]
+Aplicar las clases en login.component.html:
+html
+   <div class="form-group">
+     <label for="email">Correo electrónico</label>
+     <input id="email" type="email" class="form-control" formControlName="email" />
+   </div>
+
+(En Bootstrap 5 form-group fue eliminado; se usa mb-3 en su lugar, pero form-control se mantiene.)
+
+Estructura del proyecto
+src/app/
+├── app-routing.module.ts        → rutas principales + guards
+├── app.component.(html|ts)      → header, ngIf, event binding
+├── auth/pages/login/            → formulario de login
+├── core/
+│   ├── guards/                  → AuthGuard, RoleGuard, homeRedirectGuard
+│   ├── services/                → AuthService, PermisosService, SolicitudesService
+│   ├── models/ y enums/         → interfaces y enums
+└── features/admin/
+    ├── admin-routing.module.ts  → rutas hijas (solicitudes, catalogo, estadisticas)
+    └── pages/                   → catalogo-permisos, solicitudes, estadisticas
+Credenciales de demostración
+
+Según el código (core/services/auth.service.ts, líneas 17–20): correo admin@municipal.cl y contraseña 1234.
+
+El README original del proyecto indica Admin123!, pero el servicio valida 1234. Conviene unificar ambos.
