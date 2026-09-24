@@ -185,8 +185,6 @@ El código existente sigue estas pautas, que deben mantenerse al ampliarlo:
 | --- | --- |
 | `@angular/cli`, `@angular-devkit/build-angular` | Comandos CLI, servidor y build. |
 | `typescript`, `@angular/compiler-cli` | Tipado y compilación de plantillas Angular. |
-| `jasmine-core`, `@types/jasmine` | Framework y tipos para pruebas. |
-| `karma` y plugins | Ejecución de pruebas en navegador. |
 
 ## Guía para nuevos integrantes
 
