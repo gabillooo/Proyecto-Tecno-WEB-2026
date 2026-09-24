@@ -1,64 +1,113 @@
-# PermisosApp — explicación del código y guía para presentar
+# PermisosApp
 
-## 1. ¿Qué es este proyecto?
+Aplicación web de demostración para la administración municipal de permisos, licencias y patentes. El proyecto ofrece un acceso administrativo y tres vistas: bandeja de solicitudes, catálogo de permisos y estadísticas.
 
-PermisosApp es una aplicación web de demostración para administrar permisos municipales. Incluye inicio de sesión para un administrador y tres secciones: una bandeja de solicitudes, un catálogo de tipos de permiso y un resumen estadístico.
+La aplicación está desarrollada con Angular 15 y TypeScript. En su estado actual utiliza datos de ejemplo en memoria y una autenticación simulada en el cliente; no requiere una API para ejecutarse.
 
-La aplicación está construida con Angular 15 y TypeScript. Su propósito actual es mostrar la estructura y el flujo del panel en el navegador. No se conecta a un servidor: las solicitudes y los permisos de ejemplo viven en memoria, mientras que la sesión se guarda en el almacenamiento local del navegador.
+## Contenido
 
-**Una forma sencilla de presentarlo:** “Este proyecto organiza un panel para que personal municipal pueda revisar solicitudes, consultar los permisos disponibles y observar un resumen de los trámites. En esta etapa trabajamos con datos de demostración.”
+- [Requisitos](#requisitos)
+- [Instalación y ejecución](#instalación-y-ejecución)
+- [Credenciales de demostración](#credenciales-de-demostración)
+- [Funciones y alcance](#funciones-y-alcance)
+- [Arquitectura](#arquitectura)
+- [Estructura de carpetas](#estructura-de-carpetas)
+- [Design System](#design-system)
+- [Convenciones de código](#convenciones-de-código)
+- [Dependencias técnicas](#dependencias-técnicas)
+- [Guía para nuevos integrantes](#guía-para-nuevos-integrantes)
+- [Pruebas](#pruebas)
 
-## 2. Cómo ejecutar la aplicación
+## Requisitos
 
-Desde la carpeta del proyecto, ejecutar:
+- Node.js y npm compatibles con Angular CLI 15.
+- Navegador moderno con soporte para APIs web como `localStorage` y `crypto.randomUUID()`.
+
+## Instalación y ejecución
+
+Desde la raíz del repositorio:
 
 ```bash
-npm install
-npm start
+npm install -g @angular/cli@15
+ng new (Nombre-Proyecto)
+ng Serve (Ng s)
 ```
 
-Luego abrir `http://localhost:4200/` en el navegador. Para crear la compilación de producción:
+El servidor de desarrollo queda disponible en `http://localhost:4200/` y actualiza la aplicación al guardar cambios.
 
-```bash
-npm run build
-```
+Comandos disponibles:
 
-### Credenciales de demostración
+| Comando | Uso |
+| --- | --- |
+| `ng s` | Inicia el servidor Angular de desarrollo. |
+| `ng g c (Nombre-Componente)` |  Crear un componente para desarrollo. |
+| `ng g s (Nombre-Servicio)` | Crea un servicio para desarrollo. |
+| `ng g guard (Nombre-Guard)` | Crea un Guard para desarrollo. |
+
+## Credenciales de demostración
+
+La autenticación se realiza con credenciales fijas en el frontend:
 
 - Correo: `admin@municipal.cl`
 - Contraseña: `1234`
 
-Estas credenciales son las que valida `AuthService`. La contraseña `Admin123!` que aparecía en un README anterior no coincide con el código actual.
+## Funciones y alcance
 
-## 3. Recorrido para mostrar en vivo
+- **Acceso administrativo:** formulario reactivo con validación de correo y campos obligatorios.
+- **Solicitudes:** tabla con siete registros iniciales. Se puede cambiar su estado a aprobada o rechazada.
+- **Catálogo:** consulta de tres tipos de permiso, incluyendo categoría, tarifa, plazo y estado activo.
+- **Estadísticas:** conteo de solicitudes agrupadas por estado y tipo de permiso.
+- **Navegación protegida:** acceso al panel condicionado por sesión y rol de administrador.
 
-1. Al abrir la aplicación, la ruta principal decide a dónde enviar al visitante: al login si no hay sesión, o al panel si ya inició sesión.
-2. En el login, completar correo y contraseña. El formulario valida los campos antes de llamar al servicio de autenticación.
-3. Una vez dentro, el encabezado presenta los enlaces de Solicitudes, Catálogo y Estadísticas, además de la opción para salir.
-4. En Solicitudes se ven siete registros de ejemplo con distintos estados. Los botones Aprobar y Rechazar actualizan el estado en la sesión actual de la aplicación.
-5. En Catálogo se consultan tres tipos de permiso de ejemplo con su categoría, tarifa, plazo y estado de vigencia.
-6. En Estadísticas se ve el conteo de solicitudes agrupado por estado y tipo de permiso.
+### Persistencia y limitaciones conocidas
 
-## 4. Mapa del código
+- La sesión se conserva en `localStorage` bajo la clave `permisos_sesion`.
+- Los permisos y solicitudes se guardan en `BehaviorSubject` dentro del proceso de la aplicación. Al recargar el navegador, vuelven a los datos iniciales.
+- La autenticación y el token son de demostración; no existe validación en un servidor.
+- Los métodos de servicio para alta/edición de permisos y para etapas del trámite están parcialmente preparados, pero no tienen pantallas funcionales asociadas.
+- Los documentos y pagos son simulados; no hay carga de archivos ni pasarela de pago.
+- Las estadísticas se muestran como listas, sin visualizaciones gráficas.
+
+## Arquitectura
+
+La aplicación usa módulos de Angular y separa las responsabilidades en tres áreas:
+
+- **`app`**: módulo raíz, contenedor visual y enrutamiento general.
+- **`auth`**: inicio de sesión.
+- **`core`**: servicios singleton, guards, modelos y enums compartidos.
+- **`features/admin`**: rutas, componentes y estilos de las vistas administrativas.
+
+Flujo de navegación principal:
+
+1. La ruta raíz y las rutas desconocidas usan `homeRedirectGuard`: envía a `/admin` si hay sesión y a `/auth/login` si no la hay.
+2. La ruta `/admin` pasa por `AuthGuard` y `RoleGuard` y requiere el rol `ADMINISTRADOR`.
+3. Las rutas hijas del módulo admin son `/admin/solicitudes`, `/admin/catalogo` y `/admin/estadisticas`.
+
+## Estructura de carpetas
 
 ```text
 src/
-├── main.ts
 ├── index.html
+├── main.ts
 ├── styles.css
 └── app/
     ├── app.module.ts
     ├── app-routing.module.ts
-    ├── app.component.ts / .html / .css
+    ├── app.component.ts
+    ├── app.component.html
+    ├── app.component.css
     ├── app.component.spec.ts
     ├── auth/
     │   ├── auth.module.ts
-    │   └── pages/login/          # Formulario de acceso y estilos
+    │   └── pages/login/
+    │       ├── login.component.ts
+    │       ├── login.component.html
+    │       └── login.component.css
     ├── core/
-    │   ├── enums/                # Estados, categorías y roles
-    │   ├── guards/               # Protección y redirección de rutas
-    │   ├── models/               # Estructuras de datos
-    │   └── services/             # Autenticación, permisos y solicitudes
+    │   ├── enums/                 # Estados de solicitud, categorías y roles
+    │   ├── guards/                # Guards de autenticación, rol y redirección
+    │   ├── models/                # Interfaces y DTOs
+    │   └── services/              # Autenticación, permisos y solicitudes
     └── features/admin/
         ├── admin.module.ts
         ├── admin-routing.module.ts
@@ -69,150 +118,82 @@ src/
             └── estadisticas/
 ```
 
-La carpeta `core` contiene elementos compartidos. `auth` agrupa el acceso. `features/admin` agrupa las páginas administrativas. Dentro de cada página, el archivo TypeScript maneja los datos y acciones; el HTML define lo que ve la persona y el CSS ajusta su presentación.
+Archivos de configuración en la raíz:
 
-## 5. Explicación por partes
+- `angular.json`: opciones de build, servidor, estilos y pruebas.
+- `package.json` y `package-lock.json`: scripts y versiones de dependencias.
+- `tsconfig*.json`: opciones de compilación TypeScript para aplicación y pruebas.
+- `.editorconfig`: formato básico compartido entre editores.
+- `.gitignore`: archivos y directorios que Git debe ignorar.
 
-### 5.1 Arranque de Angular y marco de la aplicación
+## Design System
 
-- **`src/index.html`** es la página HTML inicial. El elemento `<app-root>` es el espacio donde Angular monta la aplicación.
-- **`src/main.ts`** inicia Angular cargando el módulo principal, `AppModule`.
-- **`src/app/app.module.ts`** registra el componente raíz, las rutas y módulos de navegador.
-- **`src/app/app.component.ts`** coordina el cierre de sesión y expone `AuthService` a la plantilla.
-- **`src/app/app.component.html`** presenta el encabezado con navegación, el espacio de contenido (`router-outlet`) y el pie. El encabezado solo aparece cuando existe un usuario.
-- **`src/app/app.component.css`** contiene estilos propios de ese marco.
+El proyecto usa un sistema visual propio construido con CSS. No depende de una biblioteca de componentes externa como Angular Material. Sus estilos se definen globalmente y se complementan con hojas de estilo específicas por componente.
 
-**Para explicarlo:** “`main.ts` inicia Angular; el módulo principal prepara la aplicación; y el componente raíz sostiene la navegación y el espacio donde van cambiando las páginas.”
+### Tokens visuales
 
-### 5.2 Rutas, navegación y protección
+En `src/styles.css`, las variables CSS centralizan la paleta:
 
-**`app-routing.module.ts`** describe las direcciones principales:
+| Token | Valor | Uso principal |
+| --- | --- | --- |
+| `--navy` | `#133a61` | Encabezados, navegación, botones y títulos principales. |
+| `--cyan` | `#00bde3` | Indicador visible de foco en controles. |
+| `--red` | `#bd3933` | Acentos y jerarquía de encabezados secundarios. |
+| `--pale` | `#e7f6f8` | Fondos suaves para formularios y bloques destacados. |
+| `--ink` | `#1b1b1b` | Color de texto general. |
 
-- `/` y las direcciones desconocidas usan `homeRedirectGuard` para enviar al usuario a la página adecuada.
-- `/auth` carga el módulo de autenticación.
-- `/admin` carga el módulo administrativo, después de aplicar `AuthGuard` y `RoleGuard`.
+### Tipografía, componentes y adaptación
 
-El guard de inicio consulta si hay una sesión: si existe, redirige a `/admin`; si no, a `/auth/login`. `AuthGuard` bloquea administración si no hay usuario. `RoleGuard` revisa `rolesPermitidos` y, para el panel, permite el rol administrador.
+- **Tipografías:** Merriweather para encabezados y Source Sans 3 para texto y controles. Se importan desde Google Fonts; si no están disponibles, se aplican fuentes de respaldo.
+- **Botones y campos:** reglas globales coherentes para tamaños, colores, bordes y foco visible mediante `outline`.
+- **Tablas administrativas:** `admin-shared.css` agrupa los estilos comunes. Las páginas añaden reglas propias para columnas y acciones.
+- **Login:** `login.component.css` define la tarjeta.
+- **Estadísticas:** su CSS organiza las secciones en paneles flexibles que se apilan en pantallas pequeñas.
 
-**`auth.module.ts`** declara la pantalla de login en `/auth/login`. **`admin-routing.module.ts`** conecta las rutas `/admin/solicitudes`, `/admin/catalogo` y `/admin/estadisticas` con sus componentes. Si se abre solo `/admin`, se redirige a Solicitudes.
+Al agregar una pantalla, conviene reutilizar variables y patrones existentes antes de definir colores, medidas o estilos duplicados.
 
-**Para explicarlo:** “Las rutas muestran la página que corresponde y los guards revisan que haya una sesión válida y el rol adecuado antes de entrar al panel.”
+## Convenciones de código
 
-### 5.3 Inicio de sesión
+El código existente sigue estas pautas, que deben mantenerse al ampliarlo:
 
-**`login.component.ts`** crea un formulario reactivo con Angular. El correo debe ser obligatorio y tener formato de email; la contraseña debe estar completada. `onSubmit()` revisa el formulario, activa el indicador de carga e invoca el servicio de autenticación. Si el acceso funciona, navega al panel; si falla, muestra el mensaje de credenciales inválidas.
+- **Nombres:** clases, interfaces, métodos y propiedades usan `PascalCase` para tipos y `camelCase` para miembros. Los componentes Angular terminan en `.component.ts`; los servicios, en `.service.ts`; los guards, en `.guard.ts`.
+- **Idioma del dominio:** nombres del negocio y comentarios están mayormente en español (por ejemplo, `Solicitud`, `TipoPermiso`, `aprobar`). Mantener el idioma consistente en nuevas piezas.
+- **Responsabilidades:** los componentes gestionan estado de vista y eventos; los servicios contienen acceso y transformación de datos; los modelos describen la forma de esos datos.
+- **Tipado:** preferir interfaces, enums y tipos explícitos frente a valores ambiguos. Para operaciones de servicio se usan `Observable<T>` de RxJS.
+- **Plantillas:** usar interpolación para texto, property binding para propiedades, event binding para acciones y directivas Angular para condicionar o repetir contenido.
+- **Estilos:** usar tokens CSS globales y estilos encapsulados por componente. Los patrones compartidos de administración van en `admin-shared.css`.
+- **Rutas:** las áreas funcionales se agrupan en módulos y las rutas protegidas declaran explícitamente sus guards y roles autorizados.
 
-**`login.component.html`** conecta el formulario con la vista usando `[formGroup]`, `formControlName` y `(ngSubmit)`. El botón se desactiva durante el inicio de sesión y cambia su etiqueta mientras espera. La referencia `#passwordInput` está declarada en el campo; en esta plantilla actual no hay botón que la use.
+## Dependencias técnicas
 
-**`login.component.css`** da formato a la tarjeta del login y adapta sus márgenes a pantallas pequeñas.
+### Dependencias de ejecución
 
-### 5.4 Autenticación y sesión
+| Paquete | Función |
+| --- | --- |
+| `@angular/core`, `common`, `compiler` | Framework, directivas comunes y compilación de la aplicación. |
+| `@angular/router` | Enrutamiento y guards de navegación. |
+| `@angular/forms` | Formularios reactivos del inicio de sesión. |
+| `@angular/platform-browser`, `platform-browser-dynamic` | Integración de Angular con el navegador y arranque dinámico. |
+| `@angular/animations` | Soporte de animaciones de Angular. |
+| `rxjs` | Observables, `BehaviorSubject` y operadores usados por los servicios. |
+| `zone.js` | Detección de cambios en la aplicación Angular. |
+| `tslib` | Funciones auxiliares usadas por el código compilado de TypeScript. |
 
-**`core/services/auth.service.ts`** simula la autenticación. Comprueba el correo `admin@municipal.cl` y la contraseña `1234`; devuelve un error si no coinciden. Si coinciden, crea un usuario y un token de demostración, espera brevemente y guarda la sesión en `localStorage`.
+### Herramientas de desarrollo
 
-El `BehaviorSubject` llamado `usuarioSubject` mantiene el usuario activo y `usuario$` permite que otras partes de la aplicación reciban los cambios. `logout()` elimina la sesión. `perfil()` devuelve el usuario actual con una promesa. `esRol()` comprueba el rol del usuario.
+| Paquete | Función |
+| --- | --- |
+| `@angular/cli`, `@angular-devkit/build-angular` | Comandos CLI, servidor y build. |
+| `typescript`, `@angular/compiler-cli` | Tipado y compilación de plantillas Angular. |
+| `jasmine-core`, `@types/jasmine` | Framework y tipos para pruebas. |
+| `karma` y plugins | Ejecución de pruebas en navegador. |
 
-**Para explicarlo:** “El servicio de autenticación concentra el acceso y mantiene informado al resto de la aplicación sobre quién inició sesión.”
+## Guía para nuevos integrantes
 
-### 5.5 Modelos y enums
+1. **Instala dependencias** con `npm install -g @angular/cli@15`, crea un proyecto con `ng new (Nombre-Proyecto)`, pega todo del github a tu proyecto y ejecuta `ng s`.
+2. **Prueba el acceso** con las credenciales de demostración indicadas arriba.
+3. **Sigue el flujo de datos:** revisa primero la página en `features/admin/pages`, después el servicio correspondiente en `core/services` y finalmente su modelo en `core/models`.
+4. **Al agregar una página**, crea su componente dentro de la feature correspondiente, declárala en su módulo e incorpora su ruta en el módulo de rutas de esa feature.
+5. **Al agregar un estado o categoría**, actualiza el enum y las etiquetas que correspondan; evita introducir cadenas sueltas para estados del dominio.
+6. **Al agregar estilos**, reutiliza los tokens de `styles.css` y comprueba el layout en escritorio y móvil.
 
-Los archivos de `core/models` definen la forma de los datos para que componentes y servicios compartan un vocabulario común:
-
-- **`usuario.model.ts`** define `Usuario`, `LoginDto` y `SesionDto`: el perfil, los datos ingresados al iniciar sesión y la sesión resultante.
-- **`permiso.model.ts`** define `TipoPermiso`, `RequisitoPermiso` y `TipoPermisoFormDto`. Un tipo de permiso es una entrada del catálogo; contiene categoría, descripción, requisitos, tarifa, plazo y si está activo.
-- **`solicitud.model.ts`** define `Solicitud` y sus datos asociados: documentos, observaciones, comprobantes de pago, pasos del trámite, filtros y acciones para resolver.
-
-**`core/enums/estado-solicitud.enum.ts`** define estados, categorías y roles. Los estados en el código actual son `BORRADOR`, `EN REVISION`, `OBSERVACION`, `APROBADA`, `RECHAZADA` y `EMITIDA`. También hay un mapa de etiquetas legibles para los estados. El enum establece un vocabulario consistente para las transiciones del trámite.
-
-### 5.6 Servicio del catálogo: `permisos.service.ts`
-
-El servicio comienza con tres permisos de muestra: Patente comercial, Autorización de eventos y Ocupación de vía pública. Un `BehaviorSubject` guarda la lista y permite emitir cambios. `listar()` entrega la lista completa o solo los tipos activos; `obtener()` busca un tipo por id.
-
-También existen métodos para crear, actualizar y cambiar si un permiso está activo. Al crear, el servicio asigna identificadores y una fecha de inicio de vigencia. Al actualizar, reemplaza los datos del tipo. En la interfaz actual estos métodos aún no están conectados: los botones **Nuevo tipo de permiso** y **Editar** solo se muestran.
-
-### 5.7 Servicio de solicitudes: `solicitudes.service.ts`
-
-Este servicio contiene siete solicitudes de demostración con nombres, folios, fechas, permisos, estados y algunos datos u observaciones. El `BehaviorSubject` es la fuente de datos que consumen la bandeja y las estadísticas.
-
-Entre los métodos implementados están:
-
-- `listarTodas()` y `misSolicitudes()` entregan el flujo de solicitudes.
-- `iniciarSolicitud()` crea una solicitud nueva en estado borrador.
-- `avanzarPaso()` guarda datos de un paso y pasa a revisión al llegar a la confirmación.
-- `adjuntarDocumento()` agrega metadatos del archivo; no sube el archivo a un servidor.
-- `pagarSimulado()` genera un comprobante de pago ficticio.
-- `resolver()` cambia el estado según la acción administrativa.
-- `estadisticas()` calcula cantidades por estado y tipo de permiso.
-
-En las pantallas disponibles, la bandeja usa `listarTodas()` y los botones llaman a `resolver()` para aprobar o rechazar. El mensaje de rechazo es fijo. Los otros métodos pertenecen a un flujo más amplio aún no conectado a páginas ciudadanas.
-
-### 5.8 Bandeja de solicitudes
-
-**`solicitudes.component.ts`** obtiene el observable de solicitudes al iniciar. Los métodos `aprobar()` y `rechazar()` mandan la acción al servicio.
-
-**`solicitudes.component.html`** construye la tabla. `*ngIf` espera los datos del observable con el pipe `async`; `*ngFor` genera una fila por solicitud. Los valores se insertan con interpolación `{{ ... }}`, la fecha se presenta con el pipe `date` y `(click)` conecta los botones con los métodos del componente.
-
-**`solicitudes.component.css`** comparte los estilos de tabla administrativa y destaca el estado y las acciones. La pantalla no tiene filtros ni un formulario para redactar observaciones.
-
-### 5.9 Catálogo de permisos
-
-**`catalogo-permisos.component.ts`** pide al servicio la lista incluyendo elementos activos e inactivos (`listar(false)`).
-
-**`catalogo-permisos.component.html`** recorre los tipos de permiso y muestra nombre, categoría, tarifa, plazo y estado. Usa `currency:'CLP'` para dar formato a la tarifa y muestra “Sí” o “No” según el campo `activo`.
-
-**`catalogo-permisos.component.css`** comparte los estilos de tabla y alinea los controles de esta pantalla. Los botones de alta y edición todavía no ejecutan acciones.
-
-### 5.10 Estadísticas
-
-**`estadisticas.component.ts`** se suscribe al resumen que prepara `SolicitudesService`. El servicio agrupa con `reduce()` el total por estado y por nombre de tipo de permiso.
-
-**`estadisticas.component.html`** muestra los dos grupos en listas. `keyvalue` permite recorrer las claves y cantidades de cada objeto. **`estadisticas.component.css`** organiza las listas en dos paneles y permite que se apilen en pantallas estrechas. Todavía no hay gráficos.
-
-### 5.11 Estilos globales y configuración
-
-- **`src/styles.css`** define colores, tipografías, botones, campos de formulario, tablas, layout general y reglas para pantallas pequeñas.
-- **`admin-shared.css`** reúne el formato compartido por las tablas administrativas.
-- Cada sección administrativa tiene su propio CSS para los detalles de la tabla o distribución.
-- **`angular.json`** configura la compilación, el servidor de desarrollo, los archivos de entrada, estilos globales y la configuración de pruebas.
-- **`package.json`** lista Angular, RxJS y las dependencias de desarrollo, y define comandos como `npm start`, `npm run build` y `npm test`.
-- **`tsconfig.json`, `tsconfig.app.json` y `tsconfig.spec.json`** configuran cómo TypeScript compila la aplicación y las pruebas.
-- **`.editorconfig`** contiene convenciones de formato; **`.gitignore`** enumera archivos que Git no debería versionar.
-- **`app.component.spec.ts`** es un archivo de prueba generado como plantilla. Sus expectativas aún mencionan un título “Proyecto” y un contenido que no corresponden al componente actual, por lo que debe actualizarse antes de usarlo como verificación válida.
-
-## 6. Conceptos de Angular que aparecen en el código
-
-- **Interpolación:** `{{ s.folio }}` muestra un valor de los datos en la página.
-- **Enlace de propiedades:** `[disabled]="cargando"` desactiva un botón según el estado.
-- **Enlace de eventos:** `(click)="aprobar(s.id)"` responde a una acción del usuario.
-- **Directivas estructurales:** `*ngIf` y `*ngFor` muestran contenido o repiten filas.
-- **Formularios reactivos:** `FormBuilder` y `Validators` organizan y validan el login.
-- **Inyección de dependencias:** Angular entrega servicios como `AuthService` a los componentes.
-- **Observables:** los servicios publican datos que se actualizan; el pipe `async` los consume en la plantilla.
-- **Guards:** controlan la navegación según la sesión y el rol.
-- **Pipes:** `date`, `currency` y `keyvalue` transforman datos para mostrarlos.
-
-## 7. Alcance de la demostración
-
-Para describir el estado del proyecto con precisión durante la exposición:
-
-- El inicio de sesión se valida en el navegador con credenciales fijas; no hay autenticación real de servidor.
-- La sesión se conserva en `localStorage`, pero las solicitudes y el catálogo vuelven a sus datos iniciales al recargar la página.
-- Los documentos, pagos y comprobantes son simulados.
-- Se pueden cambiar estados desde la bandeja, pero todavía no se capturan filtros ni motivos personalizados.
-- El catálogo permite consultar, pero sus botones de alta y edición aún no tienen formularios conectados.
-- Las estadísticas muestran listas en lugar de gráficos.
-- Hay estructuras y métodos preparados para pasos ciudadanos, pero este proyecto no incluye pantallas de ciudadanía.
-
-## 8. Guion sugerido para la presentación
-
-1. **Objetivo:** explicar que el panel ayuda a organizar la revisión administrativa de permisos.
-2. **Estructura:** mostrar `core`, `auth` y `features/admin` y contar qué responsabilidad tiene cada zona.
-3. **Acceso:** iniciar sesión y explicar el formulario reactivo, el servicio y la protección de rutas.
-4. **Solicitudes:** recorrer algunos registros y aprobar o rechazar uno para mostrar el cambio de estado.
-5. **Catálogo:** explicar qué datos describe cada tipo de permiso.
-6. **Estadísticas:** mostrar cómo el servicio cuenta las solicitudes por estado y por tipo.
-7. **Cierre:** comentar que los datos son de demostración y que el siguiente paso sería conectarse a una API y completar las funciones de alta, filtros y flujo ciudadano.
-
-## 9. Pruebas
-
-El proyecto tiene configurado `npm test` con Karma y Jasmine. El archivo de prueba que está presente conserva expectativas de la plantilla inicial de Angular y no describe correctamente la pantalla raíz actual; conviene corregirlo antes de tomar sus resultados como prueba del comportamiento del panel.
