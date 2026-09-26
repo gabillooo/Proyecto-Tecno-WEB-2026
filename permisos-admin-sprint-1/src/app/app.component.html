@@ -5,7 +5,9 @@
   </a>
   <nav>
     <a routerLink="/admin">Inicio</a>
-    
+    <a *ngIf="seccionAdmin !== 'solicitudes'" routerLink="/admin/solicitudes">Solicitudes</a>
+    <a *ngIf="seccionAdmin !== 'catalogo'" routerLink="/admin/catalogo">Catálogo</a>
+    <a *ngIf="seccionAdmin !== 'estadisticas'" routerLink="/admin/estadisticas">Estadísticas</a>
   </nav>
   <button class="link-button" (click)="salir()">
     Salir · {{ usuario.nombre }}
